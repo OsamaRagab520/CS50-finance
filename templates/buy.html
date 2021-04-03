@@ -5,14 +5,13 @@ Quote
 {% endblock %}
 
 {% block main %}
-{% if msg %}
-<h3>{{ msg }}</h3>
-{% else %}
-<form action="/quote" method="post">
+<form action="/buy" method="post">
     <div class="form-group">
         <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text">
     </div>
-    <button class="btn btn-primary" type="submit">Quote</button>
+    <div class="form-group">
+        <input class="form-control" name="shares" placeholder="Shares" type="number" min=1>
+    </div>
+    <button class="btn btn-primary" type="submit">Buy</button>
 </form>
-{% endif %}
 {% endblock %}

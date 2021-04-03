@@ -1,5 +1,6 @@
 import os
 
+from datetime import datetime
 from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
@@ -53,7 +54,40 @@ def index():
 @login_required
 def buy():
     """Buy shares of stock"""
-    return apology("TODO")
+
+    if request.method == "POST":
+        if not request.form.get("symbol") or not request.form.get("shares"):
+            return apology("missing entries", 403)
+
+        data = lookup(request.form.get("symbol"))
+        amount = int(request.form.get("shares"))
+
+        if data is not None:
+            user_cash = db.execute(
+                f"SELECT cash FROM users WHERE id = {session['user_id']}")
+            cost = data['price'] * amount
+
+            if cost <= user_cash[0]['cash']:
+                now = datetime.now()
+                dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+
+                db.execute(
+                    "INSERT INTO buy_txn (user_id, symbol, price, shares, occurred_at) VALUES (?, ?, ?, ?, ?)", session[
+                        'user_id'], data['symbol'], data['price'], amount, dt_string
+                )
+                db.execute(
+                    f"UPDATE users SET cash = ? where id = {session['user_id']}", (
+                        user_cash[0]['cash'] - cost)
+                )
+                return redirect("/")
+            else:
+                return apology("not enough money", 403)
+
+        else:
+            return apology("bad symbol", 403)
+
+    else:
+        return render_template("buy.html")
 
 
 @app.route("/history")
