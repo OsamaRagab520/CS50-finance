@@ -118,7 +118,7 @@ def quote():
     if request.method == "POST":
         data = lookup(request.form.get("symbol"))
         if data is not None:
-            msg = f"A share of {data[name]}, inc. ({data[symbol]}) costs {usd(data[price])}"
+            msg = f"A share of {data['name']}, inc. ({data['symbol']}) costs {usd(data['price'])}"
             return render_template("quote.html", msg=msg)
         else:
             return apology("bad symbol", 403)
