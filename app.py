@@ -1,14 +1,13 @@
+from helpers import apology, login_required, lookup, usd
+from werkzeug.security import check_password_hash, generate_password_hash
+from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
+from tempfile import mkdtemp
+from flask_session import Session
+from flask import Flask, flash, redirect, render_template, request, session
+from cs50 import SQL
+from datetime import datetime
 import os
 
-from datetime import datetime
-from cs50 import SQL
-from flask import Flask, flash, redirect, render_template, request, session
-from flask_session import Session
-from tempfile import mkdtemp
-from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
-from werkzeug.security import check_password_hash, generate_password_hash
-
-from helpers import apology, login_required, lookup, usd
 
 # Configure application
 app = Flask(__name__)
@@ -47,7 +46,14 @@ if not os.environ.get("API_KEY"):
 @login_required
 def index():
     """Show portfolio of stocks"""
-    return apology("TODO")
+    user_data = db.execute(
+        f"SELECT symbol, name, price, shares FROM holdings WHERE user_id = {session['user_id']}")
+    cash = db.execute(f"SELECT cash from users WHERE id = {session['user_id']}")[
+        0]['cash']
+    total = cash
+    for row in user_data:
+        total += (row['price'] * row['shares'])
+    return render_template("index.html", data=user_data, cash=cash, total=total)
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -56,6 +62,7 @@ def buy():
     """Buy shares of stock"""
 
     if request.method == "POST":
+
         if not request.form.get("symbol") or not request.form.get("shares"):
             return apology("missing entries", 403)
 
@@ -79,13 +86,12 @@ def buy():
                     f"SELECT shares FROM holdings WHERE user_id = ? AND symbol = ?", session['user_id'], data['symbol'])
                 if len(current_amount) == 0:
                     db.execute(
-                        "INSERT INTO holdings (user_id, symbol, price, shares) VALUES (?, ?, ?, ?)",
-                        session['user_id'], data['symbol'], data['price'], amount
+                        "INSERT INTO holdings (user_id, symbol, name,  price, shares) VALUES (?, ?, ?, ?, ?)",
+                        session['user_id'], data['symbol'], data["name"], data['price'], amount
                     )
                 else:
-                    current_amount += amount
-                    db.execute(f"UPDATE holdings SET shares = ? where id = ? AND symbol = ?",
-                               current_amount, session['user_id'], data['symbol'])
+                    db.execute(f"UPDATE holdings SET shares = ? where user_id = ? AND symbol = ?",
+                               current_amount[0]['shares'] + amount, session['user_id'], data['symbol'])
 
                 db.execute(
                     f"UPDATE users SET cash = ? where id = {session['user_id']}",
@@ -106,7 +112,9 @@ def buy():
 @login_required
 def history():
     """Show history of transactions"""
-    return apology("TODO")
+    user_data = db.execute(
+        f"SELECT symbol, price, shares, occurred_at FROM transactions WHERE user_id = {session['user_id']}")
+    return render_template("history.html", data=user_data)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -164,7 +172,7 @@ def quote():
     if request.method == "POST":
         data = lookup(request.form.get("symbol"))
         if data is not None:
-            msg = f"A share of {data['name']}, inc. ({data['symbol']}) costs {usd(data['price'])}"
+            msg = f"A share of {data['name']},({data['symbol']}) costs {usd(data['price'])}"
             return render_template("quote.html", msg=msg)
         else:
             return apology("bad symbol", 403)
@@ -209,14 +217,49 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
-    buy = db.execute(
-        f"SELECT symbol, SUM(shares) FROM buy_txn WHERE id = {session['user_id']} GROUP BY symbol ORDER BY symbol")
-    sell = db.execute(
-        f"SELECT symbol, SUM(shares) FROM sell_txn WHERE id = {session['user_id']} GROUP BY symbol ORDER BY symbol")
-    for i in range(len(buy)):
-        buy[i]['symbol']
-    total_stocks = {}
-    return apology("TODO")
+    db_response = db.execute(
+        f"SELECT symbol, shares FROM holdings WHERE user_id = {session['user_id']}")
+    print(db_response)
+    stocks = []
+    stocks_dict = {}
+    for row in db_response:
+        stocks.append(row['symbol'])
+        stocks_dict[row['symbol']] = row['shares']
+
+    if request.method == "POST":
+
+        if not request.form.get("symbol") or not request.form.get("shares"):
+            return apology("missing entries", 403)
+
+        if request.form.get("symbol") not in stocks or int(request.form.get("shares")) > stocks_dict[request.form.get("symbol")]:
+            return apology("not vaild operation", 403)
+
+        data = lookup(request.form.get("symbol"))
+
+        now = datetime.now()
+        dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
+
+        db.execute(
+            "INSERT INTO transactions (user_id, symbol, price, shares, occurred_at) VALUES (?, ?, ?, ?, ?)", session[
+                'user_id'], data['symbol'], data['price'], int(request.form.get("shares")) * -1, dt_string
+        )
+        current_amount = db.execute(
+            f"SELECT shares FROM holdings WHERE user_id = ? AND symbol = ?", session['user_id'], data['symbol'])
+        db.execute(f"UPDATE holdings SET shares = ? where user_id = ? AND symbol = ?",
+                   current_amount[0]['shares'] - int(request.form.get("shares")), session['user_id'], data['symbol'])
+
+        user_cash = db.execute(
+            f"SELECT cash FROM users WHERE id = {session['user_id']}")
+        gained = data['price'] * int(request.form.get("shares"))
+
+        db.execute(
+            f"UPDATE users SET cash = ? where id = {session['user_id']}",
+            user_cash[0]['cash'] + gained
+        )
+        return redirect("/")
+
+    else:
+        return render_template("sell.html", stocks=stocks)
 
 
 def errorhandler(e):
