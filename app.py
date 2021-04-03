@@ -72,12 +72,24 @@ def buy():
                 dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
 
                 db.execute(
-                    "INSERT INTO buy_txn (user_id, symbol, price, shares, occurred_at) VALUES (?, ?, ?, ?, ?)", session[
+                    "INSERT INTO transactions (user_id, symbol, price, shares, occurred_at) VALUES (?, ?, ?, ?, ?)", session[
                         'user_id'], data['symbol'], data['price'], amount, dt_string
                 )
+                current_amount = db.execute(
+                    f"SELECT shares FROM holdings WHERE user_id = ? AND symbol = ?", session['user_id'], data['symbol'])
+                if len(current_amount) == 0:
+                    db.execute(
+                        "INSERT INTO holdings (user_id, symbol, price, shares) VALUES (?, ?, ?, ?)",
+                        session['user_id'], data['symbol'], data['price'], amount
+                    )
+                else:
+                    current_amount += amount
+                    db.execute(f"UPDATE holdings SET shares = ? where id = ? AND symbol = ?",
+                               current_amount, session['user_id'], data['symbol'])
+
                 db.execute(
-                    f"UPDATE users SET cash = ? where id = {session['user_id']}", (
-                        user_cash[0]['cash'] - cost)
+                    f"UPDATE users SET cash = ? where id = {session['user_id']}",
+                    user_cash[0]['cash'] - cost
                 )
                 return redirect("/")
             else:
@@ -197,6 +209,13 @@ def register():
 @login_required
 def sell():
     """Sell shares of stock"""
+    buy = db.execute(
+        f"SELECT symbol, SUM(shares) FROM buy_txn WHERE id = {session['user_id']} GROUP BY symbol ORDER BY symbol")
+    sell = db.execute(
+        f"SELECT symbol, SUM(shares) FROM sell_txn WHERE id = {session['user_id']} GROUP BY symbol ORDER BY symbol")
+    for i in range(len(buy)):
+        buy[i]['symbol']
+    total_stocks = {}
     return apology("TODO")
 
 
