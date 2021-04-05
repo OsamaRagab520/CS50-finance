@@ -1,17 +1,46 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Log In
+Log In
 {% endblock %}
 
 {% block main %}
-    <form action="/login" method="post">
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
-        </div>
-        <div class="form-group">
-            <input class="form-control" name="password" placeholder="Password" type="password">
-        </div>
-        <button class="btn btn-primary" type="submit">Log In</button>
-    </form>
+<div id="status" class="alert alert-danger" role="alert" hidden></div>
+<form id="formid" action='/login'>
+    <div class="form-group">
+        <input required autocomplete="off" autofocus class="form-control" name="username" placeholder="Username"
+            type="text">
+    </div>
+    <div class="form-group">
+        <input required class="form-control" name="password" placeholder="Password" type="password">
+    </div>
+    <button class="btn btn-primary" type="submit">Log In</button>
+</form>
+
+<script>
+
+    // Listen for form's submit button 
+    $('#formid').submit(function (e) {
+        e.preventDefault();
+
+        // AJAX POST request  $.type(endpoint, data, function (reponse_data))
+        $.post("/login", {
+            username: $(this).find("input[name='username']").val(),
+            password: $(this).find("input[name='password']").val()
+        }, function (data) {
+
+            //  Display error message
+            if (data.redirect == false) {
+                $('#status').removeAttr('hidden');
+                $('#status').text(data.msg);
+            }
+
+            // Redirect the user to Homepage
+            else {
+                window.location.replace("{{ url_for('index', _external = True) }}")
+            }
+        });
+    })
+</script>
+
 {% endblock %}

@@ -5,14 +5,38 @@ Quote
 {% endblock %}
 
 {% block main %}
-{% if msg %}
-<h3>{{ msg }}</h3>
-{% else %}
-<form action="/quote" method="post">
+<div id="status" class="alert alert-danger" role="alert" hidden></div>
+<form id="formid" action="/quote">
     <div class="form-group">
         <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text">
     </div>
     <button class="btn btn-primary" type="submit">Quote</button>
 </form>
-{% endif %}
+<h3></h3>
+<script>
+
+    // Listen for form's submit button 
+    $('#formid').submit(function (e) {
+        e.preventDefault();
+
+        // AJAX POST request  $.type(endpoint, data, function (reponse_data))
+        $.post("/quote", {
+            symbol: $(this).find("input[name='symbol']").val()
+        }, function (data) {
+
+            //  Display error message
+            if (data.code == 200) {
+                $('h3').text(data.msg)
+                $('#status').setAttribute('hidden')
+            }
+
+            // Display API respone
+            else {
+                $('#status').removeAttr('hidden');
+                $('#status').text(data.msg);
+                $('h3').text('')
+            }
+        });
+    })
+</script>
 {% endblock %}

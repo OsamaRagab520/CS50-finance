@@ -17,14 +17,15 @@ Portfolio
             </tr>
         </thead>
         <tbody>
+            <!-- Insert user data in the table -->
             {% for row in data %}
             {% if row.shares > 0 %}
             <tr>
                 <td>{{ row.symbol }}</td>
                 <td>{{ row.name }}</td>
                 <td>{{ row.shares }}</td>
-                <td>{{ row.price }}</td>
-                <td>{{ row.shares*row.price }}</td>
+                <td>{{ row.price | usd }}</td>
+                <td>{{ (row.shares*row.price) | usd }}</td>
             </tr>
             {% endif %}
             {% endfor %}
@@ -33,14 +34,14 @@ Portfolio
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>{{ cash }}</td>
+                <td>{{ cash | usd }}</td>
             </tr>
             <tr>
                 <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
-                <td>{{ total }}</td>
+                <td><strong>{{ total | usd }}</strong></td>
             </tr>
         </tbody>
     </table>

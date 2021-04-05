@@ -5,13 +5,40 @@ Buy
 {% endblock %}
 
 {% block main %}
-<form action="/buy" method="post">
+<div id="status" class="alert alert-danger" role="alert" hidden></div>
+<form id="formid" action="/buy">
     <div class="form-group">
-        <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text">
+        <input required autofocus class="form-control" name="symbol" placeholder="Symbol" type="text">
     </div>
     <div class="form-group">
         <input class="form-control" name="shares" placeholder="Shares" type="number" min=1>
     </div>
-    <button class="btn btn-primary" type="submit">Buy</button>
+    <button required class="btn btn-primary" type="submit">Buy</button>
 </form>
+
+<script>
+
+    // Listen for form's submit button 
+    $('#formid').submit(function (e) {
+        e.preventDefault();
+
+        // AJAX POST request  $.type(endpoint, data, function (reponse_data))
+        $.post("/buy", {
+            symbol: $(this).find("input[name='symbol']").val(),
+            shares: $(this).find("input[name='shares']").val()
+        }, function (data) {
+            if (data.redirect == false) {
+
+                //  Display error message
+                $('#status').removeAttr('hidden');
+                $('#status').text(data.msg);
+            }
+
+            // Redirect the user to Homepage
+            else {
+                window.location.replace("{{ url_for('index', _external = True) }}")
+            }
+        });
+    });
+</script>
 {% endblock %}

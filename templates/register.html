@@ -5,7 +5,8 @@ Register
 {% endblock %}
 
 {% block main %}
-<form action="/register" method="post">
+<div id="status" class="alert alert-danger" role="alert" hidden></div>
+<form id="formid" action="/register">
     <div class="form-group">
         <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Username" type="text">
     </div>
@@ -17,4 +18,32 @@ Register
     </div>
     <button class="btn btn-primary" type="submit">Register</button>
 </form>
+
+<script>
+
+    // Listen for form's submit button 
+    $('#formid').submit(function (e) {
+        e.preventDefault();
+
+        // AJAX POST request  $.type(endpoint, data, function (reponse_data))
+        $.post("/register", {
+            username: $(this).find("input[name='username']").val(),
+            password: $(this).find("input[name='password']").val(),
+            passwordCheck: $(this).find("input[name='passwordCheck']").val()
+        }, function (data) {
+
+            //  Display error message
+            if (data.redirect == false) {
+                $('#status').removeAttr('hidden');
+                $('#status').text(data.msg);
+            }
+
+            // Redirect the user to Homepage
+            else {
+                window.location.replace("{{ url_for('index', _external = True) }}")
+            }
+        });
+    });
+</script>
+
 {% endblock %}

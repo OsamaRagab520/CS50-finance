@@ -5,7 +5,8 @@ Sell
 {% endblock %}
 
 {% block main %}
-<form action="/sell" method="post">
+<div id="status" class="alert alert-danger" role="alert" hidden></div>
+<form id="formid" action="/sell">
     <div class="form-group">
         <select name="symbol">
             <option value="symbol" selected disabled>Symbol</option>
@@ -19,4 +20,30 @@ Sell
     </div>
     <button class="btn btn-primary" type="submit">Sell</button>
 </form>
+
+<script>
+
+    // Listen for form's submit button 
+    $('#formid').submit(function (e) {
+        e.preventDefault();
+
+        // AJAX POST request  $.type(endpoint, data, function (reponse_data))
+        $.post("/sell", {
+            symbol: $(this).find("select").val(),
+            shares: $(this).find("input[name='shares']").val()
+        }, function (data) {
+
+            //  Display error message
+            if (data.redirect == false) {
+                $('#status').removeAttr('hidden');
+                $('#status').text(data.msg);
+            }
+
+            // Redirect the user to Homepage
+            else {
+                window.location.replace("{{ url_for('index', _external = True) }}")
+            }
+        });
+    });
+</script>
 {% endblock %}
