@@ -17,12 +17,12 @@ You’ll need to register for an API key in order to be able to query IEX’s da
 - Once you’ve confirmed your account via a confirmation email, visit [**https://iexcloud.io/console/tokens.**](https://iexcloud.io/console/tokens)
 - Copy the key that appears under the Token column (it should begin with `pk_`).
 - In a terminal window, execute:
-`$ export API_KEY=value`
+`export API_KEY=value`
 where `value` is that (pasted) value, without any space immediately before or after the `=`. You also may wish to paste that value in a text document somewhere, in case you need it again later.
 
 ### Pre-requisites and Local Development
 Developers using this project should already have Python3, pip and sqlite installed on their local machines.\
-From inside the 'cs50-finace' folder run `pip install -r requirements.txt`. All required packages are included in the requirements file.
+From inside the 'cs50-finance' folder run `pip install -r requirements.txt`. All required packages are included in the requirements file.
 To run the application locally run the following command:
 
     flask run
@@ -62,6 +62,8 @@ There are also a few new files:
 - *finance.db* which is the sqlite database file
 
 ## ERD
+symbol attribute could be factored out to convert the relation to 2NF.
+
 ![ERD](https://github.com/osamaragab520/cs50-finance/blob/master/static/erd.png)
 
 ## Acknowledgements & Final words
