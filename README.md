@@ -64,7 +64,7 @@ There are also a few new files:
 ## ERD
 symbol attribute could be factored out to convert the relation to 2NF.
 
-![ERD](https://github.com/osamaragab520/cs50-finance/blob/master/static/erd.png)
+![ERD](https://github.com/osamaragab520/cs50-finance/blob/main/static/erd.png)
 
 ## Acknowledgements & Final words
 This is the part of cs50 course problem set. Of course there will be imperfections, flaws that might need some more work.
