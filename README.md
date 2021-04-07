@@ -2,7 +2,7 @@
 ### Description
 Finance, a web app via which you can manage portfolios of stocks.
 Not only will this tool allow you to check real stocks’ actual prices and portfolios’ values,
-it will also let you buy (okay, “buy”) and sell (okay, “sell”) stocks by querying [**IEX**](https://iextrading.com/developer/) for stocks’ prices.
+it will also let you buy and sell stocks by querying [**IEX**](https://iextrading.com/developer/) for stocks’ prices.
 
 ### Code style
 All backend code follows [**PEP8 style guidelines**](https://www.python.org/dev/peps/pep-0008/)
@@ -64,7 +64,7 @@ There are also a few new files:
 ## ERD
 symbol attribute could be factored out to convert the relation to 2NF.
 
-![ERD](https://github.com/osamaragab520/cs50-finance/blob/main/static/erd.png)
+![ERD](https://github.com/osamaragab520/cs50-finance/blob/master/static/erd.png)
 
 ## Acknowledgements & Final words
-This is the part of cs50 course problem set. Of course there will be imperfections, flaws that might need some more work.
+This is the part of cs50 course problem set with some personal touches. Of course there will be imperfections, flaws that might need some more work.
