@@ -5,7 +5,7 @@ Sell
 {% endblock %}
 
 {% block main %}
-<div id="status" class="alert alert-danger" role="alert" hidden></div>
+<div id="status" class="alert alert-danger" role="alert"></div>
 <form id="formid" action="/sell">
     <div class="form-group">
         <select name="symbol">
@@ -35,7 +35,7 @@ Sell
 
             //  Display error message
             if (data.redirect == false) {
-                $('#status').removeAttr('hidden');
+                $('#status').css("display", "block");
                 $('#status').text(data.msg);
             }
 

@@ -5,38 +5,31 @@ Quote
 {% endblock %}
 
 {% block main %}
-<div id="status" class="alert alert-danger" role="alert" hidden></div>
+<h3></h3>
+<div id="status" class="alert alert-danger" role="alert"></div>
 <form id="formid" action="/quote">
     <div class="form-group">
         <input autocomplete="off" autofocus class="form-control" name="symbol" placeholder="Symbol" type="text">
     </div>
     <button class="btn btn-primary" type="submit">Quote</button>
 </form>
-<h3></h3>
+
 <script>
+    form_AJAX($.post, $('#formid'), true, ['symbol'], function (data) {
 
-    // Listen for form's submit button 
-    $('#formid').submit(function (e) {
-        e.preventDefault();
+        //  Display error message
+        if (data.code == 200) {
+            $('h3').text(data.msg);
+            $('#status').css("display", "none");
+        }
 
-        // AJAX POST request  $.type(endpoint, data, function (reponse_data))
-        $.post("/quote", {
-            symbol: $(this).find("input[name='symbol']").val()
-        }, function (data) {
+        // Display API respone
+        else {
+            $('#status').css("display", "block");
+            $('#status').text(data.msg);
+            $('h3').text('')
+        }
+    });
 
-            //  Display error message
-            if (data.code == 200) {
-                $('h3').text(data.msg)
-                $('#status').setAttribute('hidden')
-            }
-
-            // Display API respone
-            else {
-                $('#status').removeAttr('hidden');
-                $('#status').text(data.msg);
-                $('h3').text('')
-            }
-        });
-    })
 </script>
 {% endblock %}

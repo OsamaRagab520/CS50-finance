@@ -5,7 +5,7 @@ Buy
 {% endblock %}
 
 {% block main %}
-<div id="status" class="alert alert-danger" role="alert" hidden></div>
+<div id="status" class="alert alert-danger" role="alert"></div>
 <form id="formid" action="/buy">
     <div class="form-group">
         <input required autofocus class="form-control" name="symbol" placeholder="Symbol" type="text">
@@ -18,27 +18,18 @@ Buy
 
 <script>
 
-    // Listen for form's submit button 
-    $('#formid').submit(function (e) {
-        e.preventDefault();
+    form_AJAX($.post, $('#formid'), true, ['symbol', 'shares'], function (data) {
+        if (data.redirect == false) {
 
-        // AJAX POST request  $.type(endpoint, data, function (reponse_data))
-        $.post("/buy", {
-            symbol: $(this).find("input[name='symbol']").val(),
-            shares: $(this).find("input[name='shares']").val()
-        }, function (data) {
-            if (data.redirect == false) {
+            //  Display error message
+            $('#status').css("display", "block");
+            $('#status').text(data.msg);
+        }
 
-                //  Display error message
-                $('#status').removeAttr('hidden');
-                $('#status').text(data.msg);
-            }
-
-            // Redirect the user to Homepage
-            else {
-                window.location.replace("{{ url_for('index', _external = True) }}")
-            }
-        });
+        // Redirect the user to Homepage
+        else {
+            window.location.replace("{{ url_for('index', _external = True) }}")
+        }
     });
 </script>
 {% endblock %}
